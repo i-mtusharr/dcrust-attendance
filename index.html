@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DCRUST Attendance Checker</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9; color: #172554;
+    }
+    main {
+      max-width: 720px; margin: 20px auto;
+      background: white; padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 5px 25px #0001;
+    }
+    h1 { color: #1d4ed8; }
+    label { display: block; margin-top: 14px; }
+    input, button {
+      width: 100%; padding: 12px;
+      margin-top: 7px; border-radius: 8px;
+      font-size: 16px;
+    }
+    input { border: 1px solid #cbd5e1; }
+    button {
+      background: #2563eb; color: white;
+      border: 0; cursor: pointer;
+    }
+    .subject {
+      margin-top: 16px; padding: 16px;
+      background: #f8fafc; border-radius: 10px;
+    }
+    .bar { height: 9px; background: #e2e8f0;
+      border-radius: 9px; overflow: hidden; }
+    .fill { height: 100%; }
+    .note { color: #64748b; font-size: 13px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>DCRUST Attendance Checker</h1>
+  <p>Check subject-wise attendance and your 75% target.</p>
+
+  <label for="roll">Roll number</label>
+  <input id="roll" placeholder="Enter your roll number">
+
+  <p class="note">
+    Demo only: never enter your Samarth password here.
+    The subjects below contain sample data.
+  </p>
+
+  <button onclick="showAttendance()">Check Attendance</button>
+  <div id="results"></div>
+</main>
+
+<script>
+  // Sample data only. Replace with verified attendance records.
+  const subjects = [
+    { name: "Mathematics", present: 18, total: 24 },
+    { name: "Physics", present: 20, total: 25 },
+    { name: "Programming in C", present: 22, total: 24 }
+  ];
+
+  function showAttendance() {
+    const roll = document.getElementById("roll").value.trim();
+
+    if (!roll) {
+      alert("Please enter your roll number.");
+      return;
+    }
+
+    const results = document.getElementById("results");
+    results.replaceChildren();
+
+    const heading = document.createElement("h2");
+    heading.textContent = "Attendance for roll number " + roll;
+    results.appendChild(heading);
+
+    subjects.forEach(subject => {
+      const p = subject.present;
+      const t = subject.total;
+      const percentage = t > 0 ? p / t * 100 : 0;
+
+      // Maximum future absences while retaining at least 75%.
+      const safeBunks = Math.max(
+        0, Math.floor((p - 0.75 * t) / 0.75 + 1e-9)
+      );
+
+      // Classes that must be attended consecutively to reach 75%.
+      const needed = percentage >= 75
+        ? 0 : Math.ceil((0.75 * t - p) / 0.25 - 1e-9);
+
+      const card = document.createElement("section");
+      card.className = "subject";
+
+      const title = document.createElement("h3");
+      title.textContent = subject.name;
+
+      const stats = document.createElement("p");
+      stats.textContent =
+        `${p} / ${t} classes attended — ${percentage.toFixed(2)}%`;
+
+      const bar = document.createElement("div");
+      bar.className = "bar";
+
+      const fill = document.createElement("div");
+      fill.className = "fill";
+      fill.style.width = Math.min(100, percentage) + "%";
+      fill.style.background = percentage >= 75 ? "#16a34a" : "#dc2626";
+      bar.appendChild(fill);
+
+      const advice = document.createElement("p");
+      advice.textContent = percentage >= 75
+        ? `Estimated maximum future absences to stay at 75%: ${safeBunks}`
+        : `Attend the next ${needed} classes consecutively to reach 75%.`;
+
+      card.append(title, stats, bar, advice);
+      results.appendChild(card);
+    });
+  }
+</script>
+</body>
+</html>
